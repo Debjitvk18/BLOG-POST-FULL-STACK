@@ -107,9 +107,4 @@ This project is licensed under the MIT License.
 
 
 
----
 
-If you want, I can also **make a shorter, GitHub-friendly version with badges and screenshots**, so it looks professional when you host it.  
-
-Do you want me to do that?
-```
