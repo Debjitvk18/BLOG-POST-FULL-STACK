@@ -10,19 +10,34 @@ import {
 
 const router = express.Router();
 
-// READ all posts
+/**
+ * GET /api/posts?page=1&limit=6
+ * Fetch paginated posts
+ */
 router.get("/", fetchPosts);
 
-// READ single post
+/**
+ * GET /api/posts/:id
+ * Fetch single post by ID
+ */
 router.get("/:id", fetchPost);
 
-// CREATE post (with image)
+/**
+ * POST /api/posts
+ * Create new post with optional image upload
+ */
 router.post("/", upload.single("image"), addPost);
 
-// UPDATE post
+/**
+ * PUT /api/posts/:id
+ * Update post with optional image upload
+ */
 router.put("/:id", upload.single("image"), editPost);
 
-// DELETE post
+/**
+ * DELETE /api/posts/:id
+ * Delete a post by ID
+ */
 router.delete("/:id", removePost);
 
 export default router;

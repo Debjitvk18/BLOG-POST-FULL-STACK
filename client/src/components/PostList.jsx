@@ -12,6 +12,7 @@ export default function PostList() {
   const loadPosts = async () => {
     try {
       const res = await fetchPosts();
+      // console.log(res.data)
       setPosts(res.data);
     } catch (err) {
       console.error("Error fetching posts:", err);

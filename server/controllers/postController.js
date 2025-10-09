@@ -44,9 +44,19 @@ export const addPost = async (req, res) => {
 export const editPost = async (req, res) => {
   try {
     const { title, content } = req.body;
-    const image = req.file ? `/uploads/${req.file.filename}` : req.body.image;
-    const post = await updatePost(req.params.id, title, content, image);
-    res.json(post);
+
+    // Fetch the existing post
+    const existingPost = await getPostById(req.params.id);
+    if (!existingPost)
+      return res.status(404).json({ message: "Post not found" });
+
+    // Only update image if new file is uploaded
+    const image = req.file
+      ? `/uploads/${req.file.filename}`
+      : existingPost.image;
+
+    const updatedPost = await updatePost(req.params.id, title, content, image);
+    res.json(updatedPost);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

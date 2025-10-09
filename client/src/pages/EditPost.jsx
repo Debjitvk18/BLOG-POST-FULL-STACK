@@ -12,6 +12,7 @@ export default function EditPost() {
     const loadPost = async () => {
       try {
         const res = await fetchPostById(id);
+        console.log(res.data)
         setPost(res.data);
       } catch (err) {
         console.error("Error fetching post:", err);
