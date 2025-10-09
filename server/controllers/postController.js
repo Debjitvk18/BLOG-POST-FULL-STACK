@@ -15,7 +15,6 @@ export const fetchPosts = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 // Get single post
 export const fetchPost = async (req, res) => {
   try {
