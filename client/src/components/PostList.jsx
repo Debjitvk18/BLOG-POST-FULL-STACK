@@ -11,7 +11,7 @@ export default function PostList() {
 
   const loadPosts = async () => {
     try {
-      const res = await fetchPosts(page, 10);
+      const res = await fetchPosts(page, 6);
       setPosts(res.data.posts);
       setTotalPages(res.data.totalPages);
     } catch (err) {
@@ -27,7 +27,7 @@ export default function PostList() {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
         await deletePost(id);
-        const res = await fetchPosts(page, 10);
+        const res = await fetchPosts(page, 6);
         const newPosts = res.data.posts;
         const newTotalPages = res.data.totalPages;
         if (newPosts.length === 0 && page > 1) {
