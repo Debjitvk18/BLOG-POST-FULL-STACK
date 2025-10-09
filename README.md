@@ -24,8 +24,8 @@ A full-stack blog application built with **React**, **Express**, and **PostgreSQ
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/my-blog-project.git
-cd my-blog-project
+git clone https://github.com/Debjitvk18/BLOG-POST-FULL-STACK
+cd BLOG-POST-FULL-STACK
 ````
 
 2. **Backend Setup**
@@ -105,7 +105,7 @@ my-blog-project/
 
 This project is licensed under the MIT License.
 
-```
+
 
 ---
 
