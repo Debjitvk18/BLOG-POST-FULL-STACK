@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import PostForm from "../components/PostForm.jsx";
-import { fetchPostById, updatePost } from "../api/api.js";
+import PostForm from "../components/PostForm";
+import { fetchPostById, updatePost } from "../api/api";
 
 export default function EditPost() {
   const { id } = useParams();
@@ -29,11 +29,15 @@ export default function EditPost() {
     }
   };
 
-  if (!post) return <p>Loading...</p>;
+  if (!post) return (
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="text-slate-600 text-lg">Loading...</div>
+    </div>
+  );
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Edit Post</h1>
+      <h1 className="text-3xl font-bold mb-8 text-slate-900 text-center">Edit Post</h1>
       <PostForm initialData={post} onSubmit={handleUpdate} />
     </div>
   );

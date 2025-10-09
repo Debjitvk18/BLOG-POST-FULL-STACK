@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import PostForm from "../components/PostForm.jsx";
-import { createPost } from "../api/api.js";
+import PostForm from "../components/PostForm";
+import { createPost } from "../api/api";
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function CreatePost() {
   const handleCreate = async (formData) => {
     try {
       await createPost(formData);
-      navigate("/"); // Go back to home after creation
+      navigate("/");
     } catch (err) {
       console.error("Error creating post:", err);
     }
@@ -17,7 +17,7 @@ export default function CreatePost() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-4">Create New Post</h1>
+      <h1 className="text-3xl font-bold mb-8 text-slate-900 text-center">Create New Post</h1>
       <PostForm onSubmit={handleCreate} />
     </div>
   );
