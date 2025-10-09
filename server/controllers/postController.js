@@ -5,12 +5,31 @@ import {
   updatePost,
   deletePost,
 } from "../models/postModel.js";
+import pool from "../config/db.js";
 
 // Get all posts
 export const fetchPosts = async (req, res) => {
   try {
-    const posts = await getAllPosts();
-    res.json(posts);
+    const page = parseInt(req.query.page) || 1;     // current page
+    const limit = parseInt(req.query.limit) || 6;   // posts per page
+    const offset = (page - 1) * limit;
+
+    // Get paginated posts
+    const { rows: posts } = await pool.query(
+      "SELECT * FROM posts ORDER BY created_at DESC LIMIT $1 OFFSET $2",
+      [limit, offset]
+    );
+
+    // Get total number of posts
+    const { rows: totalRows } = await pool.query("SELECT COUNT(*) FROM posts");
+    const total = parseInt(totalRows[0].count);
+
+    res.json({
+      posts,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

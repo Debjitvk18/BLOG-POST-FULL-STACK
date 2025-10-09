@@ -3,8 +3,9 @@ import axios from "axios";
 const API = axios.create({ baseURL: "http://localhost:5000/api/posts" });
 
 // GET all posts
-export const fetchPosts = () => API.get("/");
-console.log("There is post" + fetchPosts);
+export const fetchPosts = (page = 1, limit = 6) =>
+  API.get(`/?page=${page}&limit=${limit}`);
+
 
 // GET post by id
 export const fetchPostById = (id) => API.get(`/${id}`);
