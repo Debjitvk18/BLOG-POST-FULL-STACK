@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import PostCard from "./PostCard";
+import PostModal from "./PostModal";
 import { fetchPosts, deletePost } from "../api/api";
 import ToggleView from "./ToggleView";
 
 export default function PostList() {
   const [posts, setPosts] = useState([]);
   const [view, setView] = useState("grid");
+  const [selectedPost, setSelectedPost] = useState(null);
 
   const loadPosts = async () => {
     try {
@@ -27,6 +29,14 @@ export default function PostList() {
     }
   };
 
+  const handleViewPost = (post) => {
+    setSelectedPost(post);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedPost(null);
+  };
+
   useEffect(() => {
     loadPosts();
   }, []);
@@ -42,9 +52,23 @@ export default function PostList() {
         }
       >
         {posts.map((post) => (
-          <PostCard key={post.id} post={post} onDelete={handleDelete} view={view} />
+          <PostCard
+            key={post.id}
+            post={post}
+            onDelete={handleDelete}
+            onViewPost={handleViewPost}
+            view={view}
+          />
         ))}
       </div>
+
+      {selectedPost && (
+        <PostModal
+          post={selectedPost}
+          onClose={handleCloseModal}
+          onDelete={handleDelete}
+        />
+      )}
     </div>
   );
 }
