@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from "react";
 import PostCard from "./PostCard";
-import PostModal from "./PostModal";
 import { fetchPosts, deletePost } from "../api/api";
 import ToggleView from "./ToggleView";
 
 export default function PostList() {
   const [posts, setPosts] = useState([]);
   const [view, setView] = useState("grid");
-  const [selectedPost, setSelectedPost] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   const loadPosts = async () => {
     try {
-      const res = await fetchPosts(page, 6);
+      const res = await fetchPosts(page, 10);
       setPosts(res.data.posts);
       setTotalPages(res.data.totalPages);
     } catch (err) {
@@ -25,32 +23,24 @@ export default function PostList() {
     loadPosts();
   }, [page]);
 
-const handleDelete = async (id) => {
-  if (window.confirm("Are you sure you want to delete this post?")) {
-    try {
-      await deletePost(id);
-
-      // After deletion, reload posts
-      const res = await fetchPosts(page, 6);
-      const newPosts = res.data.posts;
-      const newTotalPages = res.data.totalPages;
-
-      // If page becomes empty and not the first page, go back one page
-      if (newPosts.length === 0 && page > 1) {
-        setPage(page - 1);
-      } else {
-        setPosts(newPosts);
-        setTotalPages(newTotalPages);
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this post?")) {
+      try {
+        await deletePost(id);
+        const res = await fetchPosts(page, 10);
+        const newPosts = res.data.posts;
+        const newTotalPages = res.data.totalPages;
+        if (newPosts.length === 0 && page > 1) {
+          setPage(page - 1);
+        } else {
+          setPosts(newPosts);
+          setTotalPages(newTotalPages);
+        }
+      } catch (err) {
+        console.error("Error deleting post:", err);
       }
-    } catch (err) {
-      console.error("Error deleting post:", err);
     }
-  }
-};
-
-
-  const handleViewPost = (post) => setSelectedPost(post);
-  const handleCloseModal = () => setSelectedPost(null);
+  };
 
   return (
     <div>
@@ -68,7 +58,6 @@ const handleDelete = async (id) => {
             key={post.id}
             post={post}
             onDelete={handleDelete}
-            onViewPost={handleViewPost}
             view={view}
           />
         ))}
@@ -94,14 +83,6 @@ const handleDelete = async (id) => {
           Next
         </button>
       </div>
-
-      {selectedPost && (
-        <PostModal
-          post={selectedPost}
-          onClose={handleCloseModal}
-          onDelete={handleDelete}
-        />
-      )}
     </div>
   );
 }

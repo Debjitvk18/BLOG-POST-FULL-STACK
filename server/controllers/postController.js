@@ -11,7 +11,7 @@ import pool from "../config/db.js";
 export const fetchPosts = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;     // current page
-    const limit = parseInt(req.query.limit) || 6;   // posts per page
+    const limit = parseInt(req.query.limit) || 5;   // posts per page
     const offset = (page - 1) * limit;
 
     // Get paginated posts

@@ -28,11 +28,13 @@ export default function PostModal({ post, onClose, onDelete }) {
         <div className="p-6">
           {post.image && (
             <div className="mb-6 rounded-lg overflow-hidden bg-gray-100">
-              <img
-                src={`http://localhost:5000${post.image}`}
-                alt={post.title}
-                className="w-full h-auto max-h-[500px] object-contain"
-              />
+              <Link to={`/post/${post.id}`} onClick={onClose}>
+                <img
+                  src={`http://localhost:5000${post.image}`}
+                  alt={post.title}
+                  className="w-full h-auto max-h-[500px] object-contain cursor-pointer"
+                />
+              </Link>
             </div>
           )}
 
