@@ -1,32 +1,47 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Home from "./pages/Home.jsx";
-import EditPost from "./pages/EditPost.jsx";
-import Header from "./components/Header.jsx";
-import CreatePost from "./pages/CreatePost.jsx";
-import PostList from "./components/PostList.jsx";
-import PostPage from "./pages/PostPage.jsx"; // new full-page post view
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { Feed } from './pages/Feed';
+import { Profile } from './pages/Profile';
+import { PostDetail } from './pages/PostDetail';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
-export default function App() {
+function App() {
   return (
-    <Router>
-      <Header />
-      <div className="container mx-auto p-4">
-        <Routes>
-          {/* Home or main feed */}
-          <Route path="/" element={<Home />} />
-
-          {/* Post list page if needed */}
-          <Route path="/posts" element={<PostList />} />
-
-          {/* Create and edit posts */}
-          <Route path="/create" element={<CreatePost />} />
-          <Route path="/edit/:id" element={<EditPost />} />
-
-          {/* Full page single post view */}
-          <Route path="/post/:id" element={<PostPage />} />
-        </Routes>
-      </div>
-    </Router>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/feed"
+          element={
+            <ProtectedRoute>
+              <Feed />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/post/:id"
+          element={
+            <ProtectedRoute>
+              <PostDetail />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/feed" replace />} />
+        <Route path="*" element={<Navigate to="/feed" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
+
+export default App;
