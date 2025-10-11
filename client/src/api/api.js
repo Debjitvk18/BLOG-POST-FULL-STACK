@@ -1,26 +1,31 @@
 import axios from "axios";
 
-const API = axios.create({ baseURL: "http://localhost:5000/api/posts" });
+const API_BASE_URL = "http://localhost:5000/api";
 
-// GET all posts
-export const fetchPosts = (page = 1, limit = 6) =>
-  API.get(`/?page=${page}&limit=${limit}`);
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
+// Auth APIs
+export const register = (data) => apiClient.post("/auth/register", data);
+export const login = (data) => apiClient.post("/auth/login", data);
+export const logout = (token) => apiClient.post("/auth/logout", {}, {
+  headers: { Authorization: `Bearer ${token}` }
+});
 
-// GET post by id
-export const fetchPostById = (id) => API.get(`/${id}`);
-
-// CREATE post
-export const createPost = (formData) =>
-  API.post("/", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-
-// UPDATE post
-export const updatePost = (id, formData) =>
-  API.put(`/${id}`, formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
-
-// DELETE post
-export const deletePost = (id) => API.delete(`/${id}`);
+// Post APIs
+export const fetchPosts = () => apiClient.get("/posts");
+export const fetchPostsPaginated = (page) => apiClient.get(`/posts/paginated?page=${page}`);
+export const fetchPost = (id) => apiClient.get(`/posts/${id}`);
+export const createPost = (formData, token) => apiClient.post("/posts", formData, {
+  headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
+});
+export const updatePost = (id, formData, token) => apiClient.put(`/posts/${id}`, formData, {
+  headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
+});
+export const deletePost = (id, token) => apiClient.delete(`/posts/${id}`, {
+  headers: { Authorization: `Bearer ${token}` }
+});
