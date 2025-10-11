@@ -1,33 +1,28 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import PostRoutes from './routes/postRoutes.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
+import express from "express";
+import path from "path";
+import dotenv from "dotenv";
+import cors from "cors";
+import { fileURLToPath } from "url";
+import authRoutes from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
+import { createTableUsers } from "./models/userModel.js";
+import { createTablePosts } from "./models/postModel.js";
 
 dotenv.config();
-
-
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-
-// Allow CORS for frontend
 app.use(cors());
 app.use(express.json());
 
-
-// For serving uploaded images
+// Make uploads folder public
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+await createTableUsers();
+await createTablePosts();
 
-// API Routes
-app.use('/api/posts', PostRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
-
-app.listen(PORT, () => {
-console.log(`✅ Server running on http://localhost:${PORT}`);
-});
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

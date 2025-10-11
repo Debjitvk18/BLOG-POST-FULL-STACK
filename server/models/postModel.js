@@ -1,19 +1,25 @@
 import pool from "../config/db.js";
 
-export const createTable = async () => {
-  const query = `CREATE TABLE IF NOT EXISTS posts (
-id SERIAL PRIMARY KEY,
-title VARCHAR(255) NOT NULL,
-content TEXT NOT NULL,
-image VARCHAR(255),
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)`;
+export const createTablePosts = async () => {
+  const query = `
+    CREATE TABLE IF NOT EXISTS posts (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      title VARCHAR(255) NOT NULL,
+      content TEXT NOT NULL,
+      image VARCHAR(255),
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
   await pool.query(query);
 };
 
 export const getAllPosts = async () => {
   const { rows } = await pool.query(
-    "SELECT * FROM posts ORDER BY created_at DESC"
+    `SELECT posts.*, users.username 
+     FROM posts 
+     JOIN users ON posts.user_id = users.id
+     ORDER BY posts.created_at DESC`
   );
   return rows;
 };
@@ -23,10 +29,10 @@ export const getPostById = async (id) => {
   return rows[0];
 };
 
-export const createPost = async (title, content, image) => {
+export const createPost = async (user_id, title, content, image) => {
   const { rows } = await pool.query(
-    "INSERT INTO posts (title, content, image) VALUES ($1, $2, $3) RETURNING *",
-    [title, content, image]
+    "INSERT INTO posts (user_id, title, content, image) VALUES ($1, $2, $3, $4) RETURNING *",
+    [user_id, title, content, image]
   );
   return rows[0];
 };

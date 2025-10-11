@@ -3,7 +3,7 @@ import axios from "axios";
 const API = axios.create({ baseURL: "http://localhost:5000/api/posts" });
 
 // GET all posts
-export const fetchPosts = (page = 1, limit = 10) =>
+export const fetchPosts = (page = 1, limit = 6) =>
   API.get(`/?page=${page}&limit=${limit}`);
 
 
