@@ -46,6 +46,14 @@ export const PostDetail = () => {
     });
   };
 
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl || imageUrl.trim() === '') return null;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    return `http://localhost:5000${imageUrl}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
@@ -89,10 +97,10 @@ export const PostDetail = () => {
         </Button>
 
         <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {post.imageUrl && (
+          {getImageUrl(post.imageUrl) && (
             <div
               className="w-full h-96 bg-cover bg-center"
-              style={{ backgroundImage: `url(${post.imageUrl})` }}
+              style={{ backgroundImage: `url(${getImageUrl(post.imageUrl)})` }}
             />
           )}
 

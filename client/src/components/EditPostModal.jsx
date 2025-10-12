@@ -7,8 +7,8 @@ import { api } from '../utils/api';
 export const EditPostModal = ({ post, onClose, onSuccess }) => {
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(post.imageUrl || null);
+  const [image, setImage] = useState(null); // new image file
+  const [imagePreview, setImagePreview] = useState(post.imageUrl || null); // preview
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -17,11 +17,14 @@ export const EditPostModal = ({ post, onClose, onSuccess }) => {
     if (file) {
       setImage(file);
       const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
+      reader.onloadend = () => setImagePreview(reader.result);
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImagePreview(null);
   };
 
   const handleSubmit = async (e) => {
@@ -30,6 +33,7 @@ export const EditPostModal = ({ post, onClose, onSuccess }) => {
     setIsLoading(true);
 
     try {
+      // If imagePreview is null and user didn't upload new image, it will remove the old image
       await api.updatePost(post.id, title, content, image || undefined);
       onSuccess();
     } catch (err) {
@@ -96,14 +100,20 @@ export const EditPostModal = ({ post, onClose, onSuccess }) => {
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      setImage(null);
-                      setImagePreview(null);
-                    }}
+                    onClick={handleRemoveImage}
                     className="absolute top-2 right-2 bg-red-600 text-white p-2 rounded-full hover:bg-red-700"
                   >
                     <X size={16} />
                   </button>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Upload a new image to replace
+                  </p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="mt-2"
+                  />
                 </div>
               ) : (
                 <label className="cursor-pointer">

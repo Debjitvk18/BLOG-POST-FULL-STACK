@@ -23,9 +23,9 @@ export const Profile = () => {
     setError(null);
 
     try {
-      const response = await api.getPosts();
-      const allPosts = mapPostsToFrontend(response);
-      setPosts(allPosts);
+      const response = await api.getMyPosts(1);
+      const mappedPosts = mapPostsToFrontend(response.posts || response);
+      setPosts(mappedPosts);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch posts');
     } finally {
@@ -38,7 +38,9 @@ export const Profile = () => {
   }, []);
 
   const handleDelete = async (postId) => {
-    if (!confirm('Are you sure you want to delete this post?')) return;
+    if (!confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
 
     try {
       await api.deletePost(postId);
@@ -113,9 +115,7 @@ export const Profile = () => {
 
         {!loading && !error && posts.length === 0 && (
           <div className="text-center py-20">
-            <p className="text-gray-500 text-lg mb-4">
-              You haven't created any posts yet.
-            </p>
+            <p className="text-gray-500 text-lg mb-4">You haven't created any posts yet.</p>
             <Button onClick={() => setShowCreateModal(true)}>
               Create Your First Post
             </Button>

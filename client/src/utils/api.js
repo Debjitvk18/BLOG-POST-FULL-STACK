@@ -15,43 +15,43 @@ export const clearAuthToken = () => {
 export const getAuthHeaders = () => {
   const token = getAuthToken();
   const headers = {};
-
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-
+  if (token) headers['Authorization'] = `Bearer ${token}`;
   return headers;
 };
+
+export const getJsonHeaders = () => ({
+  'Content-Type': 'application/json',
+  ...getAuthHeaders(),
+});
 
 export const api = {
   async register(username, email, password) {
     const response = await fetch(`${BASE_URL}/auth/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getJsonHeaders(),
       body: JSON.stringify({ username, email, password }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Registration failed');
-    }
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Registration failed');
+    return data;
   },
 
   async login(email, password) {
     const response = await fetch(`${BASE_URL}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getJsonHeaders(),
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Login failed');
-    }
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Login failed');
+    if (data.token) setAuthToken(data.token);
+    return data;
   },
 
   async logout() {
@@ -61,38 +61,47 @@ export const api = {
     });
 
     if (!response.ok) throw new Error('Logout failed');
-
     clearAuthToken();
   },
 
   async getPosts() {
-    const response = await fetch(`${BASE_URL}/posts`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${BASE_URL}/posts`, { headers: getAuthHeaders() });
 
-    if (!response.ok) throw new Error('Failed to fetch posts');
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch posts');
+    return data;
   },
 
   async getPaginatedPosts(page = 1) {
-    const response = await fetch(`${BASE_URL}/posts/paginated?page=${page}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${BASE_URL}/posts/paginated?page=${page}`, { headers: getAuthHeaders() });
 
-    if (!response.ok) throw new Error('Failed to fetch posts');
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch paginated posts');
+    return data;
+  },
+
+  async getMyPosts(page = 1) {
+    const response = await fetch(`${BASE_URL}/posts/my-posts?page=${page}`, { headers: getAuthHeaders() });
+
+    let data = {};
+    try { data = await response.json(); } catch {}
+
+    if (!response.ok) throw new Error(data.message || "Failed to fetch user's posts");
+    return data;
   },
 
   async getPost(id) {
-    const response = await fetch(`${BASE_URL}/posts/${id}`, {
-      headers: getAuthHeaders(),
-    });
+    const response = await fetch(`${BASE_URL}/posts/${id}`, { headers: getAuthHeaders() });
 
-    if (!response.ok) throw new Error('Failed to fetch post');
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch post');
+    return data;
   },
 
   async createPost(title, content, image) {
@@ -103,16 +112,15 @@ export const api = {
 
     const response = await fetch(`${BASE_URL}/posts`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers: getAuthHeaders(), // no need for Content-Type with FormData
       body: formData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to create post');
-    }
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to create post');
+    return data;
   },
 
   async updatePost(id, title, content, image) {
@@ -127,12 +135,11 @@ export const api = {
       body: formData,
     });
 
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message || 'Failed to update post');
-    }
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update post');
+    return data;
   },
 
   async deletePost(id) {
@@ -141,8 +148,10 @@ export const api = {
       headers: getAuthHeaders(),
     });
 
-    if (!response.ok) throw new Error('Failed to delete post');
+    let data = {};
+    try { data = await response.json(); } catch {}
 
-    return response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to delete post');
+    return true;
   },
 };

@@ -24,14 +24,24 @@ export const PostCard = ({
     navigate(`/post/${post.id}`);
   };
 
+  const getImageUrl = (imageUrl) => {
+    if (!imageUrl || imageUrl.trim() === '') return null;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    return `http://localhost:5000${imageUrl}`;
+  };
+
+  const imageUrl = getImageUrl(post.imageUrl);
+
   if (viewMode === 'list') {
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
         <div className="flex flex-col md:flex-row">
-          {post.imageUrl && (
+          {imageUrl && (
             <div
               className="md:w-64 h-48 md:h-auto bg-cover bg-center cursor-pointer"
-              style={{ backgroundImage: `url(${post.imageUrl})` }}
+              style={{ backgroundImage: `url(${imageUrl})` }}
               onClick={handleCardClick}
             />
           )}
@@ -83,10 +93,10 @@ export const PostCard = ({
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 border border-gray-200">
-      {post.imageUrl && (
+      {imageUrl && (
         <div
           className="h-48 bg-cover bg-center cursor-pointer"
-          style={{ backgroundImage: `url(${post.imageUrl})` }}
+          style={{ backgroundImage: `url(${imageUrl})` }}
           onClick={handleCardClick}
         />
       )}

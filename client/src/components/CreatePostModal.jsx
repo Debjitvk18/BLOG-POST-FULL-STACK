@@ -1,15 +1,15 @@
-import React, { useState } from 'react';
-import { X, Upload } from 'lucide-react';
-import { Input } from './Input';
-import { Button } from './Button';
-import { api } from '../utils/api';
+import React, { useState } from "react";
+import { X, Upload } from "lucide-react";
+import { Input } from "./Input";
+import { Button } from "./Button";
+import { api } from "../utils/api";
 
 export const CreatePostModal = ({ onClose, onSuccess }) => {
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleImageChange = (e) => {
@@ -26,14 +26,14 @@ export const CreatePostModal = ({ onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
       await api.createPost(title, content, image || undefined);
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create post');
+      setError(err instanceof Error ? err.message : "Failed to create post");
     } finally {
       setIsLoading(false);
     }
@@ -122,19 +122,10 @@ export const CreatePostModal = ({ onClose, onSuccess }) => {
           </div>
 
           <div className="flex gap-4">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="outline"
-              fullWidth
-            >
+            <Button type="button" onClick={onClose} variant="outline" fullWidth>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              isLoading={isLoading}
-              fullWidth
-            >
+            <Button type="submit" isLoading={isLoading} fullWidth>
               Create Post
             </Button>
           </div>

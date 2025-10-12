@@ -1,6 +1,11 @@
 import React from 'react';
 
-export const Input = ({ label, error, className = '', ...props }) => {
+export const Input = ({
+  label,
+  error,
+  className = '',
+  ...props
+}) => {
   return (
     <div className="w-full">
       {label && (

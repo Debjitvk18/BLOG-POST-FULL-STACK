@@ -1,23 +1,22 @@
 import express from "express";
+import { upload } from "../middleware/upload.js";
 import {
   fetchPosts,
-  fetchPostsPaginated,
   fetchPost,
   addPost,
   editPost,
   removePost,
+  fetchPostsPaginated,
+  fetchUserPosts, // ✅ new controller
 } from "../controllers/postController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
-import { upload } from "../middleware/upload.js";
 
 const router = express.Router();
 
-// Public routes
-router.get("/", fetchPosts);                     // All posts
-router.get("/paginated", fetchPostsPaginated);  // Pagination (must be BEFORE :id)
-router.get("/:id", fetchPost);                  // Single post
-
-// Protected routes
+router.get("/", fetchPosts);
+router.get("/paginated", fetchPostsPaginated);
+router.get("/my-posts", verifyToken, fetchUserPosts); // ✅ only user’s posts
+router.get("/:id", fetchPost);
 router.post("/", verifyToken, upload.single("image"), addPost);
 router.put("/:id", verifyToken, upload.single("image"), editPost);
 router.delete("/:id", verifyToken, removePost);

@@ -16,7 +16,8 @@ export const Button = ({
     primary: 'bg-[#255F38] hover:bg-[#1F7D53] text-white',
     secondary: 'bg-[#27391C] hover:bg-[#18230F] text-white',
     danger: 'bg-red-600 hover:bg-red-700 text-white',
-    outline: 'border-2 border-[#255F38] text-[#255F38] hover:bg-[#255F38] hover:text-white',
+    outline:
+      'border-2 border-[#255F38] text-[#255F38] hover:bg-[#255F38] hover:text-white',
   };
 
   const widthClass = fullWidth ? 'w-full' : '';

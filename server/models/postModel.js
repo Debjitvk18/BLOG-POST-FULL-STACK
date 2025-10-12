@@ -11,7 +11,7 @@ export const createTablePosts = async () => {
       image VARCHAR(255),
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
-  `;  
+  `;
   await pool.query(query);
 };
 
@@ -56,11 +56,10 @@ export const deletePost = async (id) => {
   return true;
 };
 
-// Fetch posts with pagination
+// Fetch posts with pagination (for global feed)
 export const getPostsPaginated = async (page = 1, limit = 6) => {
   const offset = (page - 1) * limit;
 
-  // Fetch posts with limit and offset
   const { rows } = await pool.query(
     `SELECT posts.*, users.username 
      FROM posts 
@@ -70,9 +69,38 @@ export const getPostsPaginated = async (page = 1, limit = 6) => {
     [limit, offset]
   );
 
-  // Get total count for frontend pagination
   const { rows: countRows } = await pool.query("SELECT COUNT(*) FROM posts");
   const total = parseInt(countRows[0].count, 10);
 
   return { posts: rows, total, page, totalPages: Math.ceil(total / limit) };
+};
+
+// ✅ Fetch posts created by a specific user (for "My Posts" page)
+export const getUserPosts = async (user_id, page = 1, limit = 6) => {
+  const offset = (page - 1) * limit;
+
+  const postsQuery = `
+    SELECT posts.*, users.username 
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    WHERE user_id = $1
+    ORDER BY posts.created_at DESC
+    LIMIT $2 OFFSET $3
+  `;
+
+  const countQuery = `SELECT COUNT(*) FROM posts WHERE user_id = $1`;
+
+  const [postsResult, countResult] = await Promise.all([
+    pool.query(postsQuery, [user_id, limit, offset]),
+    pool.query(countQuery, [user_id]),
+  ]);
+
+  const total = parseInt(countResult.rows[0].count, 10);
+
+  return {
+    posts: postsResult.rows,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  };
 };

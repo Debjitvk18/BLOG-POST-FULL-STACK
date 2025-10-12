@@ -1,11 +1,11 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Login } from './pages/Login';
-import { Signup } from './pages/Signup';
-import { Feed } from './pages/Feed';
-import { Profile } from './pages/Profile';
-import { PostDetail } from './pages/PostDetail';
-import { ProtectedRoute } from './components/ProtectedRoute';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Login } from "./pages/Login";
+import { Signup } from "./pages/Signup";
+import { Feed } from "./pages/Feed";
+import { Profile } from "./pages/Profile";
+import { PostDetail } from "./pages/PostDetail";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 
 function App() {
   return (

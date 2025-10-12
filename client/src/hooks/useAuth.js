@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getAuthToken } from '../utils/api';
 
 export const useAuth = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
