@@ -8,11 +8,12 @@ import {
   removePost,
   fetchPostsPaginated,
   fetchUserPosts, // ✅ new controller
+  fetchOtherPosts,
 } from "../controllers/postController.js";
 import { verifyToken } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
-
+router.get("/other-posts", verifyToken, fetchOtherPosts);
 router.get("/", fetchPosts);
 router.get("/paginated", fetchPostsPaginated);
 router.get("/my-posts", verifyToken, fetchUserPosts); // ✅ only user’s posts

@@ -7,17 +7,30 @@ import { api } from '../utils/api';
 export const EditPostModal = ({ post, onClose, onSuccess }) => {
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
-  const [image, setImage] = useState(null); // new image file
-  const [imagePreview, setImagePreview] = useState(post.imageUrl || null); // preview
+  const [image, setImage] = useState(null);
+  const [removeImage, setRemoveImage] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const getFullImageUrl = (imageUrl) => {
+    if (!imageUrl || imageUrl.trim() === '') return null;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    return `http://localhost:5000${imageUrl}`;
+  };
+
+  const [imagePreview, setImagePreview] = useState(getFullImageUrl(post.imageUrl));
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setImage(file);
+      setRemoveImage(false);
       const reader = new FileReader();
-      reader.onloadend = () => setImagePreview(reader.result);
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
       reader.readAsDataURL(file);
     }
   };
@@ -25,6 +38,7 @@ export const EditPostModal = ({ post, onClose, onSuccess }) => {
   const handleRemoveImage = () => {
     setImage(null);
     setImagePreview(null);
+    setRemoveImage(true);
   };
 
   const handleSubmit = async (e) => {
@@ -33,8 +47,13 @@ export const EditPostModal = ({ post, onClose, onSuccess }) => {
     setIsLoading(true);
 
     try {
-      // If imagePreview is null and user didn't upload new image, it will remove the old image
-      await api.updatePost(post.id, title, content, image || undefined);
+      if (image) {
+        await api.updatePost(post.id, title, content, image);
+      } else if (removeImage) {
+        await api.updatePost(post.id, title, content, null);
+      } else {
+        await api.updatePost(post.id, title, content,post.imageUrl);
+      }
       onSuccess();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update post');
@@ -105,15 +124,6 @@ export const EditPostModal = ({ post, onClose, onSuccess }) => {
                   >
                     <X size={16} />
                   </button>
-                  <p className="text-sm text-gray-500 mt-2">
-                    Upload a new image to replace
-                  </p>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="mt-2"
-                  />
                 </div>
               ) : (
                 <label className="cursor-pointer">

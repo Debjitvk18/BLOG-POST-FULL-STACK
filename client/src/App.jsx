@@ -6,6 +6,7 @@ import { Feed } from "./pages/Feed";
 import { Profile } from "./pages/Profile";
 import { PostDetail } from "./pages/PostDetail";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import { OtherPost } from "./pages/OthersPost";
 
 function App() {
   return (
@@ -27,6 +28,15 @@ function App() {
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
+          }
+        />
+        {/* Change from here */}
+             <Route
+          path="/other"
+          element={
+          
+              <OtherPost />
+            
           }
         />
         <Route

@@ -53,7 +53,7 @@ export const PostDetail = () => {
     }
     return `http://localhost:5000${imageUrl}`;
   };
-
+  // console.log(getImageUrl)
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
