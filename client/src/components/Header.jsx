@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogOut, Home, User ,Users} from "lucide-react";
-import { api, clearAuthToken } from "../utils/api";
+import { api, clearTokens } from "../utils/api";
 
 export const Header = () => {
   const navigate = useNavigate();
@@ -10,10 +10,10 @@ export const Header = () => {
   const handleLogout = async () => {
     try {
       await api.logout();
-      clearAuthToken();
+      clearTokens();
       navigate("/login");
     } catch (error) {
-      clearAuthToken();
+      clearTokens();
       navigate("/login");
     }
   };

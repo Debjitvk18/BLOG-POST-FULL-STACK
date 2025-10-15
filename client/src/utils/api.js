@@ -1,19 +1,21 @@
 const BASE_URL = "http://localhost:5000/api";
 
-export const getAuthToken = () => {
-  return localStorage.getItem("token");
+/* ----------------------------- TOKEN HELPERS ----------------------------- */
+export const getAccessToken = () => localStorage.getItem("accessToken");
+export const getRefreshToken = () => localStorage.getItem("refreshToken");
+
+export const setTokens = (accessToken, refreshToken) => {
+  if (accessToken) localStorage.setItem("accessToken", accessToken);
+  if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 };
 
-export const setAuthToken = (token) => {
-  localStorage.setItem("token", token);
-};
-
-export const clearAuthToken = () => {
-  localStorage.removeItem("token");
+export const clearTokens = () => {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
 };
 
 export const getAuthHeaders = () => {
-  const token = getAuthToken();
+  const token = getAccessToken();
   const headers = {};
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
@@ -24,7 +26,56 @@ export const getJsonHeaders = () => ({
   ...getAuthHeaders(),
 });
 
+/* ----------------------------- REFRESH TOKEN ----------------------------- */
+const refreshAccessToken = async () => {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) throw new Error("No refresh token available");
+
+  const response = await fetch(`${BASE_URL}/auth/refresh`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: refreshToken }),
+  });
+
+  if (!response.ok) throw new Error("Failed to refresh token");
+
+  const data = await response.json();
+  if (data.accessToken) {
+    localStorage.setItem("accessToken", data.accessToken);
+    return data.accessToken;
+  } else {
+    throw new Error("No access token in refresh response");
+  }
+};
+
+/* --------------------------- FETCH WITH AUTO REFRESH --------------------------- */
+const fetchWithAuth = async (url, options = {}, retry = true) => {
+  const response = await fetch(url, {
+    ...options,
+    headers: { ...options.headers, ...getAuthHeaders() },
+  });
+
+  // If token expired, try refreshing once
+  if (response.status === 401 && retry) {
+    try {
+      const newAccessToken = await refreshAccessToken();
+      const retryResponse = await fetch(url, {
+        ...options,
+        headers: { ...options.headers, Authorization: `Bearer ${newAccessToken}` },
+      });
+      return retryResponse;
+    } catch (err) {
+      clearTokens();
+      throw new Error("Session expired, please log in again");
+    }
+  }
+
+  return response;
+};
+
+/* ----------------------------- API FUNCTIONS ----------------------------- */
 export const api = {
+  /* REGISTER */
   async register(username, email, password) {
     const response = await fetch(`${BASE_URL}/auth/register`, {
       method: "POST",
@@ -32,15 +83,12 @@ export const api = {
       body: JSON.stringify({ username, email, password }),
     });
 
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Registration failed");
     return data;
   },
 
+  /* LOGIN */
   async login(email, password) {
     const response = await fetch(`${BASE_URL}/auth/login`, {
       method: "POST",
@@ -48,153 +96,109 @@ export const api = {
       body: JSON.stringify({ email, password }),
     });
 
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Login failed");
-    if (data.token) setAuthToken(data.token);
+
+    if (data.accessToken && data.refreshToken) {
+      setTokens(data.accessToken, data.refreshToken);
+    } else if (data.token) {
+      // backward compatibility
+      localStorage.setItem("accessToken", data.token);
+    }
+
     return data;
   },
 
+  /* LOGOUT */
   async logout() {
     const response = await fetch(`${BASE_URL}/auth/logout`, {
       method: "POST",
       headers: getAuthHeaders(),
+      body: JSON.stringify({ token: getRefreshToken() }),
     });
 
     if (!response.ok) throw new Error("Logout failed");
-    clearAuthToken();
+    clearTokens();
   },
 
+  /* GET ALL POSTS */
   async getPosts() {
-    const response = await fetch(`${BASE_URL}/posts`, {
-      headers: getAuthHeaders(),
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const response = await fetchWithAuth(`${BASE_URL}/posts`);
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Failed to fetch posts");
     return data;
   },
 
+  /* PAGINATED POSTS */
   async getPaginatedPosts(page = 1) {
-    const response = await fetch(`${BASE_URL}/posts/paginated?page=${page}`, {
-      headers: getAuthHeaders(),
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
-    if (!response.ok)
-      throw new Error(data.message || "Failed to fetch paginated posts");
+    const response = await fetchWithAuth(`${BASE_URL}/posts/paginated?page=${page}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "Failed to fetch paginated posts");
     return data;
   },
 
+  /* USER'S OWN POSTS */
   async getMyPosts(page = 1) {
-    const response = await fetch(`${BASE_URL}/posts/my-posts?page=${page}`, {
-      headers: getAuthHeaders(),
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
-    if (!response.ok)
-      throw new Error(data.message || "Failed to fetch user's posts");
+    const response = await fetchWithAuth(`${BASE_URL}/posts/my-posts?page=${page}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "Failed to fetch user's posts");
     return data;
   },
 
-  // 🆕 NEW: Get other users' posts
+  /* OTHER USERS' POSTS */
   async getOtherPosts(page = 1) {
-    const response = await fetch(`${BASE_URL}/posts/other-posts?page=${page}`, {
-      headers: getAuthHeaders(),
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
-    if (!response.ok)
-      throw new Error(data.message || "Failed to fetch other users' posts");
+    const response = await fetchWithAuth(`${BASE_URL}/posts/other-posts?page=${page}`);
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.message || "Failed to fetch other users' posts");
     return data;
   },
 
+  /* GET SINGLE POST */
   async getPost(id) {
-    const response = await fetch(`${BASE_URL}/posts/${id}`, {
-      headers: getAuthHeaders(),
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const response = await fetchWithAuth(`${BASE_URL}/posts/${id}`);
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Failed to fetch post");
     return data;
   },
 
+  /* CREATE POST */
   async createPost(title, content, image) {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
     if (image) formData.append("image", image);
 
-    const response = await fetch(`${BASE_URL}/posts`, {
+    const response = await fetchWithAuth(`${BASE_URL}/posts`, {
       method: "POST",
-      headers: getAuthHeaders(), // no need for Content-Type with FormData
       body: formData,
     });
 
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Failed to create post");
     return data;
   },
 
+  /* UPDATE POST */
   async updatePost(id, title, content, image) {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
-    formData.append("image", image);
+    if (image) formData.append("image", image);
 
-    const response = await fetch(`${BASE_URL}/posts/${id}`, {
+    const response = await fetchWithAuth(`${BASE_URL}/posts/${id}`, {
       method: "PUT",
-      headers: getAuthHeaders(),
       body: formData,
     });
 
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Failed to update post");
     return data;
   },
 
+  /* DELETE POST */
   async deletePost(id) {
-    const response = await fetch(`${BASE_URL}/posts/${id}`, {
-      method: "DELETE",
-      headers: getAuthHeaders(),
-    });
-
-    let data = {};
-    try {
-      data = await response.json();
-    } catch {}
-
+    const response = await fetchWithAuth(`${BASE_URL}/posts/${id}`, { method: "DELETE" });
+    const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.message || "Failed to delete post");
     return true;
   },

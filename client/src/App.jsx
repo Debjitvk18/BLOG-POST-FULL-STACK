@@ -31,14 +31,7 @@ function App() {
           }
         />
         {/* Change from here */}
-             <Route
-          path="/other"
-          element={
-          
-              <OtherPost />
-            
-          }
-        />
+        <Route path="/other" element={<OtherPost />} />
         <Route
           path="/post/:id"
           element={

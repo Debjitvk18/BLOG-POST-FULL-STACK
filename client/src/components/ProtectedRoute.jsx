@@ -1,11 +1,13 @@
-import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { getAuthToken } from '../utils/api';
+import React from "react";
+import { Navigate } from "react-router-dom";
+import { getAccessToken, getRefreshToken } from "../utils/api";
 
 export const ProtectedRoute = ({ children }) => {
-  const token = getAuthToken();
+  const accessToken = getAccessToken();
+  const refreshToken = getRefreshToken();
 
-  if (!token) {
+  // ✅ Allow access if either token exists
+  if (!accessToken && !refreshToken) {
     return <Navigate to="/login" replace />;
   }
 
