@@ -43,7 +43,7 @@ export const fetchUserPosts = async (req, res) => {
     const { page = 1, limit = 6 } = req.query;
 
     const result = await getUserPosts(user_id, page, limit);
-    console.log(result);
+   
     res.json(result);
   } catch (err) {
     res
@@ -70,13 +70,16 @@ export const addPost = async (req, res) => {
   try {
     const { title, content } = req.body;
     const user_id = req.user.id; // from token
-    const image = req.file ? `/uploads/${req.file.filename}` : null;
-    console.log(image);
+    const image = req.file ? req.file.path : null; // Cloudinary gives full URL
+
+   
+
     const newPost = await createPost(user_id, title, content, image);
     res
       .status(201)
       .json({ message: "Post created successfully", post: newPost });
   } catch (err) {
+    console.err(err);
     res
       .status(500)
       .json({ message: "Error creating post", error: err.message });
@@ -87,9 +90,9 @@ export const addPost = async (req, res) => {
 export const editPost = async (req, res) => {
   try {
     const { title, content } = req.body;
-    console.log(req.body.image);
+   
     const image = req.file
-      ? `/uploads/${req.file.filename}`
+      ? req.file.path // Cloudinary URL
       : req.body.image !== undefined
       ? req.body.image
       : null;
@@ -127,11 +130,9 @@ export const fetchOtherPosts = async (req, res) => {
 
     res.json(result);
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        message: "Error fetching other users' posts",
-        error: err.message,
-      });
+    res.status(500).json({
+      message: "Error fetching other users' posts",
+      error: err.message,
+    });
   }
 };
